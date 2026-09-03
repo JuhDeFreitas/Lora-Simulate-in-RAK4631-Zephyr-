@@ -1,0 +1,38 @@
+/* SPDX-License-Identifier: Apache-2.0
+ *
+ * Devicetree overlay merged automatically when building for
+ * rak4631/nrf52840.
+ *
+ * Flash map for the RAKwireless UF2 bootloader (Adafruit nRF52 family,
+ * "SoftDevice: not found" -> no SoftDevice present):
+ *
+ *   0x000000 .. 0x001000   MBR                (managed by the bootloader)
+ *   0x001000 .. 0x0f4000   application        <- this build (code_partition)
+ *   0x0f4000 .. 0x100000   UF2 bootloader     (do not touch)
+ *
+ * The upstream board inherits nrf52840_partition.dtsi, which links the
+ * application at 0x0 and collides with the MBR/bootloader. Override it so
+ * the image is linked at 0x1000, right after the MBR, which is where the
+ * no-SoftDevice Adafruit bootloader jumps to.
+ */
+
+/delete-node/ &boot_partition;
+/delete-node/ &slot0_partition;
+/delete-node/ &slot1_partition;
+/delete-node/ &storage_partition;
+
+&flash0 {
+	partitions {
+		code_partition: partition@1000 {
+			compatible = "zephyr,mapped-partition";
+			label = "code";
+			reg = <0x00001000 0x000f3000>;
+		};
+	};
+};
+
+/ {
+	chosen {
+		zephyr,code-partition = &code_partition;
+	};
+};

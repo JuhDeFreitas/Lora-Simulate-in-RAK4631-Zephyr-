@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: Apache-2.0
+
+mainmenu "RAK4631 Application"
+
+menu "ICC common core"
+
+config ICC_LOG_LEVEL
+	int "ICC 'icc' log module level"
+	default 3
+	range 0 4
+	help
+	  Compile-time log level for the 'icc' logging module implemented in
+	  source/icc_common_core/src/icc_log.c.
+	  0 = OFF, 1 = ERR, 2 = WRN, 3 = INF, 4 = DBG.
+
+endmenu
+
+source "Kconfig.zephyr"

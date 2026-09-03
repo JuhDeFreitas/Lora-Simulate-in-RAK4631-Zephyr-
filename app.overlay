@@ -1,0 +1,13 @@
+/* SPDX-License-Identifier: Apache-2.0
+ *
+ * Application-wide devicetree overlay (applied for every board).
+ * Board-specific overlays live in boards/<board>.overlay
+ */
+
+/ {
+	aliases {
+		/* app-level aliases go here, e.g.:
+		 * status-led = &led0;
+		 */
+	};
+};

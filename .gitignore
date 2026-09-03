@@ -1,0 +1,18 @@
+.venv/
+external
+
+# West-managed workspace (Zephyr + modules), checked out at the repo root
+# by `west init`. Not part of the application repository.
+/.west/
+/zephyr/
+/modules/
+/bootloader/
+/tools/
+
+# Build output
+**/build*/
+twister-out*/
+
+# Editor / tooling
+.vscode/compile_commands.json
+.vscode/extensions.json

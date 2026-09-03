@@ -1,0 +1,6 @@
+[submodule "source/icc_common_core"]
+	path = source/icc_common_core
+	url = ssh://git@bitbucket.inatel.br:7999/icc_common/icc_common_core.git
+[submodule ".devcontainer"]
+	path = .devcontainer
+	url = ssh://git@bitbucket.inatel.br:7999/zep/zephyr_docker.git
