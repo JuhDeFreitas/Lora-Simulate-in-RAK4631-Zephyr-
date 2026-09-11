@@ -1,42 +1,12 @@
-# SPDX-License-Identifier: Apache-2.0
-#
-# West manifest for the RAK4631 application (T3 / application topology).
-#
-# Zephyr and its modules are imported from the upstream Zephyr manifest.
-# `revision` is pinned to a specific commit for reproducible builds; bump it
-# and run `west update` to move to a newer Zephyr.
-#
-# To (re)initialise the workspace with this manifest:
-#
-#   west init -l west-manifest
-#   west update
-#
-# `west list` / `west update` currently resolve against zephyr/west.yml
-# (see .west/config); this file is the intended long-term manifest.
-
 manifest:
-  version: "1.0"
-
   remotes:
     - name: zephyrproject
       url-base: https://github.com/zephyrproject-rtos
-
-  defaults:
-    remote: zephyrproject
-
   projects:
     - name: zephyr
       repo-path: zephyr
-      revision: b904e0ca7d57f9f061605f586987534707310781
+      remote: zephyrproject
+      revision: v4.4.0
+      clone-depth: 1
       import:
-        # Only pull the modules this application actually needs.
-        name-allowlist:
-          - cmsis
-          - cmsis_6
-          - hal_nordic
-          - mbedtls
-          - mcuboot
-          - net-tools
-          - picolibc
-          - segger
-          - tinycrypt
+        path-prefix: external

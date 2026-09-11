@@ -34,5 +34,15 @@
 / {
 	chosen {
 		zephyr,code-partition = &code_partition;
+		/* Route console/log/shell over USB CDC ACM so the board is
+		 * usable without an external UART adapter. */
+		zephyr,console = &cdc_acm_uart0;
+		zephyr,shell-uart = &cdc_acm_uart0;
+	};
+};
+
+&zephyr_udc0 {
+	cdc_acm_uart0: cdc_acm_uart0 {
+		compatible = "zephyr,cdc-acm-uart";
 	};
 };

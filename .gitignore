@@ -1,18 +1,35 @@
+# Python
 .venv/
-external
+__pycache__/
+*.pyc
 
-# West-managed workspace (Zephyr + modules), checked out at the repo root
-# by `west init`. Not part of the application repository.
-/.west/
+# Build outputs
+build/
+*.hex
+build.log
+
+# VSCode
+.vscode/
+.vscode/compile_commands.json
+
+# Zephyr / West (workspace populated by `west update`; only west.yml is tracked)
+.west/
+/external/
 /zephyr/
 /modules/
 /bootloader/
 /tools/
+west-manifest/.west/
+west-manifest/.venv/
+west-manifest/external/
+docker/west-manifest
 
-# Build output
-**/build*/
-twister-out*/
+# Generated headers / tools
+source/tools/inc/git_description.h
 
-# Editor / tooling
-.vscode/compile_commands.json
-.vscode/extensions.json
+# Clang / tooling artifacts
+.clang
+.clangd
+
+# GitHub workflows (only if you really want to ignore locally generated stuff)
+.github

@@ -1,3 +1,32 @@
 {
-  "projects": {}
+  "projects": {
+    "rak4631_application": {
+      "relPath": "",
+      "name": "rak4631_application",
+      "buildConfigs": {
+        "build/rak4631/nrf52840": {
+          "relBoardDir": "boards",
+          "relBoardSubDir": "../external/zephyr/boards/rakwireless/rak4631",
+          "board": "rak4631/nrf52840",
+          "name": "build/rak4631/nrf52840",
+          "compilerOptimization": "debug",
+          "westBuildArgs": [],
+          "westBuildCMakeArgs": [
+            "-DCONFIG_DEBUG_OPTIMIZATIONS=y",
+            "-DCONFIG_DEBUG_THREAD_INFO=y"
+          ],
+          "confFiles": {
+            "config": [],
+            "overlay": []
+          }
+        }
+      },
+      "twisterConfigs": {},
+      "confFiles": {
+        "config": [],
+        "overlay": []
+      }
+    }
+  },
+  "runnerProfiles": []
 }
