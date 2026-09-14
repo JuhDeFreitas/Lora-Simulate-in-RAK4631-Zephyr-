@@ -27,5 +27,6 @@ target_include_directories(app PRIVATE
 # --- Application sources ----------------------------------------------------
 target_sources(app PRIVATE
   source/main.c
+  source/lora/lora.c
   ${ICC_COMMON_CORE}/src/icc_log.c
 )
