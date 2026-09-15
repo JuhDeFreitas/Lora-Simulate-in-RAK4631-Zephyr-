@@ -17,6 +17,8 @@ Zephyr RTOS application for the RAKwireless **RAK4631** (Nordic **nRF52840**) bo
 │   └── rak4631_nrf52840.overlay    # board-specific devicetree overlay
 ├── source/
 │   ├── main.c                  # application entry point
+│   ├── lora/                   # point-to-point LoRa (raw radio)
+│   ├── lorawan/                # LoRaWAN (OTAA, active in main.c)
 │   └── icc_common_core/        # shared ICC library (git submodule)
 ├── west-manifest/west.yml      # west manifest (Zephyr + module revisions)
 └── zephyr/ modules/ …          # west-managed workspace (git-ignored)
@@ -54,6 +56,32 @@ west build -b rak4631/nrf52840 --sysbuild . -- -DSB_CONFIG_BOOTLOADER_MCUBOOT=y
 ```bash
 west flash            # via J-Link / SEGGER RTT
 ```
+
+## LoRa / LoRaWAN
+
+O rádio SX1262 é declarado uma única vez no devicetree do board, sob o
+alias `lora0`; as duas implementações em `source/` reutilizam o mesmo
+nó de hardware.
+
+- **`source/lora/`** — LoRa ponto a ponto puro, via
+  `<zephyr/drivers/lora.h>` (driver, sem stack de rede). RF (frequência,
+  SF, banda, coding rate) é configurada manualmente em runtime com
+  `lora_config()`; envio com `lora_send()`. Sem join, sessão ou
+  criptografia. Requer só `CONFIG_LORA=y`.
+- **`source/lorawan/`** — LoRaWAN via `<zephyr/lorawan/lorawan.h>`
+  (subsistema Zephyr, backend `loramac-node`). Join OTAA
+  (`lorawan_join()`) com DevEUI/JoinEUI/AppKey fixos no código, uplinks
+  com `lorawan_send()`. Região e plano de canais vêm do Kconfig
+  (`CONFIG_LORAWAN_REGION_US915`), não do código. Requer
+  `CONFIG_LORA=y`, `CONFIG_LORAWAN=y`, região, e stacks aumentadas
+  (`CONFIG_MAIN_STACK_SIZE`, `CONFIG_SYSTEM_WORKQUEUE_STACK_SIZE`) para
+  a stack de criptografia síncrona do join/send.
+
+Estado atual: `main.c` chama apenas a LoRaWAN (`lorawan_init()` /
+`lorawan_send_payload()`); o caminho LoRa puro está comentado em
+`main.c`, mas continua compilado.
+
+Detalhes de devicetree, Kconfig e parâmetros: [docs/lora-lorawan-readme.md](docs/lora-lorawan-readme.md).
 
 ## ICC common core
 
