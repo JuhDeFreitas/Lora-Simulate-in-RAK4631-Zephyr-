@@ -15,7 +15,34 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS_OKAY(LORA_NODE),
 
 static const struct device *const lora_dev = DEVICE_DT_GET(LORA_NODE);
 
-#define LORA_FREQ_HZ 902700000
+/*
+ * Temporarily set to 917.2 MHz (one of the AU915 sub-band 2 channels used
+ * by the LoRaWAN side) to test whether packet loss is frequency-dependent
+ * rather than a LoRaWAN configuration/protocol issue. Was 902700000.
+ */
+#define LORA_FREQ_HZ 917200000
+
+/* Number of send attempts before giving up on a payload. */
+#define LORA_SEND_RETRY_COUNT 4
+
+/* Delay between send retries. */
+#define LORA_SEND_RETRY_DELAY_S 2
+
+/*
+ * When enabled, each send hops to the next frequency in LORA_HOP_FREQUENCIES
+ * instead of staying on LORA_FREQ_HZ. Used to test whether packet loss is
+ * caused by channel hopping itself (matching LoRaWAN's behavior) rather than
+ * by LoRaWAN's protocol/downlink activity.
+ */
+#define LORA_FREQ_HOP_ENABLE true
+
+/* AU915 sub-band 2 channel frequencies, matching the LoRaWAN channel mask. */
+static const uint32_t LORA_HOP_FREQUENCIES[] = {
+	916800000, 917000000, 917200000, 917400000,
+	917600000, 917800000, 918000000, 918200000,
+};
+
+static uint8_t lora_hop_index;
 
 static struct lora_modem_config lora_cfg = {
 	.frequency = LORA_FREQ_HZ,
@@ -66,17 +93,45 @@ os_int32_t app_lora_send(const os_uint8_t *data, os_uint8_t length)
 		return ICC_ERROR;
 	}
 
-	int ret = lora_send(lora_dev, (uint8_t *)data, length);
+	int ret;
 
-	if (ret < 0) {
+	if (LORA_FREQ_HOP_ENABLE) {
+		lora_cfg.frequency = LORA_HOP_FREQUENCIES[lora_hop_index];
+		lora_hop_index = (lora_hop_index + 1) % ARRAY_SIZE(LORA_HOP_FREQUENCIES);
+
+		if (lora_config(lora_dev, &lora_cfg) < 0) {
+			ICC_LOG_ERROR(
+				ICC_ERR_LORA_INIT,
+				"LoRa hop frequency reconfigure failed."
+			);
+
+			return ICC_ERROR;
+		}
+	}
+
+	/*
+	 * Plain point-to-point LoRa has no MAC-layer ACK, so this is a blind
+	 * resend on failure, not a confirmed delivery like LoRaWAN's.
+	 */
+	for (uint8_t attempt = 1u; attempt <= LORA_SEND_RETRY_COUNT; attempt++) {
+		ret = lora_send(lora_dev, (uint8_t *)data, length);
+
+		if (ret == 0) {
+			return ICC_OK;
+		}
+
 		ICC_LOG_ERROR(
 			ICC_ERR_LORA_SEND,
-			"LoRa send failed: %d",
+			"LoRa send failed (attempt %u/%u): %d",
+			attempt,
+			LORA_SEND_RETRY_COUNT,
 			ret
 		);
 
-		return ICC_ERROR;
+		if (attempt < LORA_SEND_RETRY_COUNT) {
+			k_sleep(K_SECONDS(LORA_SEND_RETRY_DELAY_S));
+		}
 	}
 
-	return ICC_OK;
+	return ICC_ERROR;
 }
